@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<select id="city">
+  <option>Delhi</option>
+  <option>Mumbai</option>
+</select>
+
+<p id="result"></p>
+
+<script>
+document.getElementById("city").addEventListener("change", function(){
+    document.getElementById("result").innerText = this.value;
+});
+</script>
+
+</body>
+</html>

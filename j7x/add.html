@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Add Form</title>
+<style>
+  :root {
+    --primary-color: #6a0dad;
+    --error-color: red;
+    --card-background-color: #fff;
+    --card-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    --font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-family);
+    background: #f7f5fb;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    color: var(--primary-color);
+  }
+
+  form {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    margin: 130px auto;
+    width: 50%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  label {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input, textarea {
+    font-size: 14px;
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  .error {
+    border: 2px solid var(--error-color);
+  }
+
+  .error-message {
+    font-size: 12px;
+    color: var(--error-color);
+    margin-top: 3px;
+  }
+
+  button {
+    grid-column: span 2;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #5a009a;
+  }
+
+  @media(max-width:1200px){
+    form {
+      width: 90%;
+      grid-template-columns: 1fr;
+      margin: 30px auto;
+    }
+  }
+
+  @media(max-width:728px){
+    form {
+      width: 100%;
+      margin: 20px auto;
+    }
+  }
+
+  /* Modal styles */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  .modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card-background-color);
+    box-shadow: var(--card-shadow);
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 20;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .modal b {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 15px;
+  }
+
+  .modal input {
+    width: 80px;
+    margin: 5px;
+  }
+
+  .modal-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .modal-buttons button {
+    min-width: 100px;
+  }
+
+  @media(max-width:600px){
+    .modal {
+      width: 90%;
+      padding: 15px;
+    }
+    .modal h2 {
+      font-size: 16px;
+    }
+    .modal b {
+      font-size: 14px;
+    }
+    .modal input {
+      width: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Service Add Form</h1>
+<form id="serviceForm">
+  <!-- Read-only fields -->
+  <div>
+    <label for="plateNo">Plate No</label>
+    <input type="text" id="plateNo" value="KL-07-AB-1234" readonly>
+  </div>
+  <div>
+    <label for="brand">Brand</label>
+    <input type="text" id="brand" value="Toyota" readonly>
+  </div>
+  <div>
+    <label for="jobCardId">Job Card ID</label>
+    <input type="text" id="jobCardId" value="JC-2024-001" readonly>
+  </div>
+  <div>
+    <label for="advisorName">Advisor Name</label>
+    <input type="text" id="advisorName" value="John Smith" readonly>
+  </div>
+  <div>
+    <label for="supervisor">Supervisor <span style="color:red">*</span></label>
+    <input type="text" id="supervisor" required>
+    <div class="error-message" id="supervisorError"></div>
+  </div>
+  <div>
+    <label for="task">Task <span style="color:red">*</span></label>
+    <input type="text" id="task" required>
+    <div class="error-message" id="taskError"></div>
+  </div>
+  <div style="grid-column: span 2;">
+    <label for="description">Description <span style="color:red">*</span></label>
+    <textarea id="description" rows="3" required></textarea>
+    <div class="error-message" id="descriptionError"></div>
+  </div>
+  <button type="submit">Submit</button>
+</form>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2>Did you work during break time?</h2>
+    <b>Worked Time during Breaks</b>
+    <input type="number" id="breakHours" min="0" placeholder="Hours">
+    <input type="number" id="breakMinutes" min="0" max="59" placeholder="Minutes">
+    <div class="modal-buttons">
+      <button id="saveButton">Yes</button>
+      <button id="cancelButton">No</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('serviceForm');
+const modalOverlay = document.getElementById('modalOverlay');
+const saveButton = document.getElementById('saveButton');
+const cancelButton = document.getElementById('cancelButton');
+const breakHoursInput = document.getElementById('breakHours');
+const breakMinutesInput = document.getElementById('breakMinutes');
+
+[breakHoursInput, breakMinutesInput].forEach(input => {
+  input.addEventListener('keydown', function(e){
+    if(!['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key) && !/^\d$/.test(e.key)){
+      e.preventDefault();
+    }
+  });
+});
+function validateForm() {
+  let isValid = true;
+  const fields = [
+    {id:'supervisor', error:'supervisorError'},
+    {id:'task', error:'taskError'},
+    {id:'description', error:'descriptionError'}
+  ];
+  fields.forEach(f=>{
+    const el = document.getElementById(f.id);
+    const err = document.getElementById(f.error);
+    if(!el.value.trim()){
+      el.classList.add('error');
+      err.textContent = 'This field is required';
+      isValid = false;
+    } else {
+      el.classList.remove('error');
+      err.textContent = '';
+    }
+  });
+  return isValid;
+}
+
+function openModal() {
+  breakHoursInput.value = 0;
+  breakMinutesInput.value = 0;
+  modalOverlay.style.display = 'block';
+  breakHoursInput.focus();
+}
+
+function closeModal() {
+  modalOverlay.style.display = 'none';
+}
+
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  if(validateForm()){
+    openModal();
+  }
+});
+
+cancelButton.addEventListener('click', ()=>{
+  closeModal();
+  window.location.href = 'http://127.0.0.1:5500/dashboard/services.html';
+});
+
+saveButton.addEventListener('click', ()=>{
+  const hours = parseInt(breakHoursInput.value)||0;
+  const minutes = parseInt(breakMinutesInput.value)||0;
+  if(hours === 0 && minutes === 0){
+    alert("Please enter valid worked hours or minutes.");
+    return;
+  }
+
+  const serviceData = {
+    plateNo: document.getElementById('plateNo').value,
+    brand: document.getElementById('brand').value,
+    jobCardId: document.getElementById('jobCardId').value,
+    advisorName: document.getElementById('advisorName').value,
+    supervisor: document.getElementById('supervisor').value,
+    task: document.getElementById('task').value,
+    description: document.getElementById('description').value,
+    breakHours: hours,
+    breakMinutes: minutes,
+    timestamp: new Date().toISOString()
+  };
+
+  const existing = JSON.parse(localStorage.getItem('services')||'[]');
+  existing.push(serviceData);
+  localStorage.setItem('services', JSON.stringify(existing));
+
+  form.reset();
+  closeModal();
+
+  window.location.href = 'http://127.0.0.1:5500/dashboard/services.html';
+});
+</script>
+</body>
+</html>
